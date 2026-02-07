@@ -1,0 +1,17 @@
+{
+  "es": {
+    "title": "Gestor de Eventos UTE",
+    "welcome": "Bienvenido al Sistema de Gestión de Eventos de la UTE",
+    "subtitle": "Seleccione la operación que desee registrar.",
+    "nav_home": "Inicio",
+    "nav_events": "Eventos",
+    "nav_contacts": "Contactos",
+    "nav_locations": "Ubicaciones",
+    "question": "¿Deseas ver el informe de hoy?",
+    "view_report": "Ver Informe",
+    "report_desc": "Resumen total de registros",
+    "footer": "Universidad Tecnológica Equinoccial"
+    
+  }
+  
+}

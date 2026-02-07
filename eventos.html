@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Eventos - UTE</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Gestión de Eventos</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="eventos.html">Eventos</a></li>
+                <li><a href="contactos.html">Contactos</a></li>
+                <li><a href="ubicacion.html">Ubicaciones</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Agregar Nuevo Evento</h2>
+        <form id="form-eventos">
+            <div>
+                <label for="titulo">Nombre del evento:</label>
+                <input type="text" id="titulo" required>
+            </div>
+            <div>
+                <label for="fecha_hora">Fecha y Hora:</label>
+                <input type="datetime-local" id="fecha_hora" required>
+            </div>
+            <div>
+                <label for="lugar">Lugar:</label>
+                <input type="text" id="lugar" required>
+            </div>
+            <button type="submit">Guardar en Firebase</button>
+        </form>
+        
+        <hr>
+        <h2>Eventos en la Nube</h2>
+        <ul id="lista-eventos"></ul>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxKQWalmHfLxhbYGru_hzvfuVCUJuHuzw",
+            authDomain: "caso-practico-c631b.firebaseapp.com",
+            projectId: "caso-practico-c631b",
+            storageBucket: "caso-practico-c631b.firebasestorage.app",
+            messagingSenderId: "233285378258",
+            appId: "1:233285378258:web:8abcd2c3ae504e17da8d0b"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Guardar
+        document.getElementById('form-eventos').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await addDoc(collection(db, "eventos"), {
+                    titulo: document.getElementById('titulo').value,
+                    fecha_hora: document.getElementById('fecha_hora').value,
+                    lugar: document.getElementById('lugar').value,
+                    createdAt: serverTimestamp()
+                });
+                alert("¡Guardado!");
+                location.reload();
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        });
+
+        // Leer
+        const lista = document.getElementById('lista-eventos');
+        const q = query(collection(db, "eventos"), orderBy("createdAt", "desc"));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+            const item = doc.data();
+            lista.innerHTML += `<li><strong>${item.titulo}</strong> - ${item.lugar}</li>`;
+        });
+    </script>
+</body>
+</html>

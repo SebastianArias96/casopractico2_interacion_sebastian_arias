@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe de Gestión - UTE</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Estilos específicos para impresión */
+        @media print {
+            header nav, .no-print, .action-buttons, footer {
+                display: none !important;
+            }
+            body { background: white !important; }
+            main { box-shadow: none !important; max-width: 100% !important; margin: 0; }
+            .data-section { page-break-inside: avoid; margin-bottom: 2rem; }
+            .print-header { display: block !important; text-align: center; border-bottom: 3px solid #2563eb; padding-bottom: 1rem; margin-bottom: 2rem; }
+        }
+        
+        .print-header { display: none; }
+        .action-buttons { display: flex; gap: 1rem; justify-content: center; margin-bottom: 2rem; flex-wrap: wrap; }
+        
+        .btn-print {
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            padding: 0.8rem 1.5rem;
+            color: white; border: none; border-radius: 0.5rem;
+            font-weight: 600; cursor: pointer; transition: all 0.3s ease;
+        }
+        .btn-print:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+        .btn-export { background: linear-gradient(135deg, #10b981, #059669); }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem; margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white; padding: 1.5rem; border-radius: 0.75rem;
+            text-align: center; border-left: 5px solid #2563eb;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .stat-card h3 { font-size: 0.9rem; color: #64748b; text-transform: uppercase; margin-bottom: 0.5rem; }
+        .stat-card .number { font-size: 2.5rem; font-weight: 800; color: #1e40af; }
+
+        .data-list { display: grid; gap: 1rem; margin-top: 1rem; }
+        .item-row { 
+            background: #fff; padding: 1rem; border-radius: 0.5rem; 
+            border: 1px solid #e2e8f0; display: flex; justify-content: space-between;
+        }
+        .empty-state { text-align: center; padding: 2rem; color: #94a3b8; font-style: italic; }
+    </style>
+</head>
+<body>
+    <header class="no-print">
+        <h1>📊 Informe de Gestión</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="eventos.html">Eventos</a></li>
+                <li><a href="contactos.html">Contactos</a></li>
+                <li><a href="ubicacion.html">Ubicaciones</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <div class="print-header">
+            <h1>📊 Informe General de Gestión</h1>
+            <p><strong>Universidad Tecnológica Equinoccial</strong></p>
+            <p>Fecha: <span id="print-date"></span></p>
+        </div>
+        
+        <div class="action-buttons no-print">
+            <button class="btn-print" onclick="window.print()">🖨️ Imprimir o PDF</button>
+        </div>
+        
+        <div class="summary-stats">
+            <div class="stat-card">
+                <h3>Eventos</h3>
+                <div class="number" id="count-eventos">0</div>
+            </div>
+            <div class="stat-card" style="border-left-color: #10b981;">
+                <h3>Contactos</h3>
+                <div class="number" id="count-contactos">0</div>
+            </div>
+            <div class="stat-card" style="border-left-color: #f59e0b;">
+                <h3>Ubicaciones</h3>
+                <div class="number" id="count-ubicaciones">0</div>
+            </div>
+        </div>
+
+        <section class="data-section">
+            <h2>📅 Últimos Eventos</h2>
+            <div id="list-eventos" class="data-list"><p class="empty-state">Cargando...</p></div>
+        </section>
+
+        <section class="data-section">
+            <h2>👥 Agenda de Contactos</h2>
+            <div id="list-contactos" class="data-list"><p class="empty-state">Cargando...</p></div>
+        </section>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, limit, orderBy } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxKQWalmHfLxhbYGru_hzvfuVCUJuHuzw",
+            authDomain: "caso-practico-c631b.firebaseapp.com",
+            projectId: "caso-practico-c631b",
+            storageBucket: "caso-practico-c631b.firebasestorage.app",
+            messagingSenderId: "233285378258",
+            appId: "1:233285378258:web:8abcd2c3ae504e17da8d0b"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function fetchReport() {
+            try {
+                // 1. CARGAR EVENTOS
+                const qEventos = query(collection(db, "eventos"), orderBy("createdAt", "desc"));
+                const snapEventos = await getDocs(qEventos);
+                document.getElementById('count-eventos').innerText = snapEventos.size;
+                renderList('list-eventos', snapEventos, (d) => `<strong>${d.titulo}</strong> <span>${d.fecha_hora}</span>`);
+
+                // 2. CARGAR CONTACTOS
+                const snapContactos = await getDocs(collection(db, "contactos"));
+                document.getElementById('count-contactos').innerText = snapContactos.size;
+                renderList('list-contactos', snapContactos, (d) => `<strong>${d.nombre}</strong> <span>${d.email}</span>`);
+
+                // 3. CARGAR UBICACIONES (Solo conteo)
+                const snapUbicaciones = await getDocs(collection(db, "ubicaciones"));
+                document.getElementById('count-ubicaciones').innerText = snapUbicaciones.size;
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function renderList(elementId, snapshot, templateFunc) {
+            const container = document.getElementById(elementId);
+            if (snapshot.empty) {
+                container.innerHTML = '<p class="empty-state">No hay registros.</p>';
+                return;
+            }
+            container.innerHTML = "";
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const div = document.createElement('div');
+                div.className = 'item-row';
+                div.innerHTML = templateFunc(data);
+                container.appendChild(div);
+            });
+        }
+
+        // Fecha actual
+        document.getElementById('print-date').innerText = new Date().toLocaleDateString();
+        fetchReport();
+    </script>
+</body>
+</html>

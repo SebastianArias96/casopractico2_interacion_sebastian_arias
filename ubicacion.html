@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Ubicaciones - UTE</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Gestión de Ubicaciones</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="eventos.html">Eventos</a></li>
+                <li><a href="contactos.html">Contactos</a></li>
+                <li><a href="ubicacion.html">Ubicaciones</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Agregar Nueva Ubicación</h2>
+        <form id="form-ubicaciones">
+            <div>
+                <label for="titulo">Título:</label>
+                <input type="text" id="titulo" placeholder="Ej: Campus Principal" required>
+            </div>
+            
+            <div>
+                <label for="direccion">Dirección:</label>
+                <input type="text" id="direccion" placeholder="Ej: Av. Principal 123" required>
+            </div>
+            
+            <div>
+                <label for="coordenadas">Coordenadas Geográficas (Lat, Lon):</label>
+                <input type="text" id="coordenadas" placeholder="Ej: -0.1807, -78.4678" required>
+            </div>
+            
+            <button type="submit">Guardar Ubicación en Firebase</button>
+        </form>
+        
+        <hr>
+        <h2>Ubicaciones Registradas (Nube)</h2>
+        <ul id="lista-ubicaciones">
+            </ul>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Universidad Tecnológica Equinoccial</p>
+    </footer>
+
+    <script type="module">
+        // Importaciones desde la CDN estable
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
+
+        // Tu configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxKQWalmHfLxhbYGru_hzvfuVCUJuHuzw",
+            authDomain: "caso-practico-c631b.firebaseapp.com",
+            projectId: "caso-practico-c631b",
+            storageBucket: "caso-practico-c631b.firebasestorage.app",
+            messagingSenderId: "233285378258",
+            appId: "1:233285378258:web:8abcd2c3ae504e17da8d0b",
+            measurementId: "G-NDYQDSYH14"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const form = document.getElementById('form-ubicaciones');
+        const listaUl = document.getElementById('lista-ubicaciones');
+
+        // --- GUARDAR UBICACIÓN ---
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const nuevaUbicacion = {
+                titulo: document.getElementById('titulo').value,
+                direccion: document.getElementById('direccion').value,
+                coordenadas: document.getElementById('coordenadas').value,
+                createdAt: serverTimestamp()
+            };
+
+            try {
+                await addDoc(collection(db, "ubicaciones"), nuevaUbicacion);
+                alert("📍 Ubicación guardada con éxito!");
+                form.reset();
+                cargarUbicaciones();
+            } catch (error) {
+                console.error("Error al guardar:", error);
+                alert("Error al conectar con la base de datos.");
+            }
+        });
+
+        // --- LEER UBICACIONES ---
+        async function cargarUbicaciones() {
+            listaUl.innerHTML = "<li>Cargando ubicaciones...</li>";
+            try {
+                const q = query(collection(db, "ubicaciones"), orderBy("createdAt", "desc"));
+                const querySnapshot = await getDocs(q);
+                
+                listaUl.innerHTML = "";
+                
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const li = document.createElement('li');
+                    li.style.padding = "10px";
+                    li.style.borderBottom = "1px solid #ddd";
+                    
+                    // Usamos backticks para insertar las variables de Firebase
+                    li.innerHTML = `
+                        <strong>${data.titulo}</strong><br>
+                        🏠 Dirección: ${data.direccion}<br>
+                        🗺️ Coordenadas: ${data.coordenadas}
+                    `;
+                    listaUl.appendChild(li);
+                });
+            } catch (error) {
+                console.error("Error al cargar:", error);
+                listaUl.innerHTML = "<li>Error al cargar datos de la nube.</li>";
+            }
+        }
+
+        // Carga inicial
+        cargarUbicaciones();
+    </script>
+</body>
+</html>
