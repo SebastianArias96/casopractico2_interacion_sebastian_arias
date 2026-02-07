@@ -8,50 +8,50 @@
 </head>
 <body>
     <header>
-        <h1>Gestión de Contactos</h1>
+        <h1 data-i18n="title_contactos">Gestión de Contactos</h1>
         <nav>
             <ul>
-                <li><a href="index.html">Inicio</a></li>
-                <li><a href="eventos.html">Eventos</a></li>
-                <li><a href="contactos.html">Contactos</a></li>
-                <li><a href="ubicacion.html">Ubicaciones</a></li>
+                <li><a href="index.html" data-i18n="nav_home">Inicio</a></li>
+                <li><a href="eventos.html" data-i18n="nav_events">Eventos</a></li>
+                <li><a href="contactos.html" data-i18n="nav_contacts">Contactos</a></li>
+                <li><a href="ubicacion.html" data-i18n="nav_locations">Ubicaciones</a></li>
             </ul>
         </nav>
+
+        <div style="text-align:center; margin-top: 1rem;">
+            <button class="lang-btn" onclick="setLanguage('esp')">🇪🇨 Español</button>
+            <button class="lang-btn" onclick="setLanguage('eng')">🇺🇸 English</button>
+        </div>
     </header>
 
     <main>
-        <h2>Agregar Nuevo Contacto</h2>
+        <h2 data-i18n="add_contact">Agregar Nuevo Contacto</h2>
         <form id="form-contactos">
             <div>
-                <label for="nombre">Nombres y Apellidos:</label>
+                <label for="nombre" data-i18n="lbl_full_name">NOMBRES Y APELLIDOS:</label>
                 <input type="text" id="nombre" placeholder="Ej: Dr. Juan Pérez" required>
             </div>
-            
             <div>
-                <label for="cedula">Cédula de Identidad:</label>
+                <label for="cedula" data-i18n="lbl_id">CÉDULA DE IDENTIDAD:</label>
                 <input type="text" id="cedula" placeholder="Ej: 1712345678" required>
             </div>
-
             <div>
-                <label for="profesion">Profesión:</label>
+                <label for="profesion" data-i18n="lbl_job">PROFESIÓN:</label>
                 <input type="text" id="profesion" placeholder="Ej: Ingeniero" required>
             </div>
-            
             <div>
-                <label for="email">Correo Electrónico:</label>
+                <label for="email" data-i18n="lbl_email">CORREO ELECTRÓNICO:</label>
                 <input type="email" id="email" placeholder="ejemplo@ute.edu.ec" required>
             </div>
-            
             <div>
-                <label for="telefono">Teléfono:</label>
+                <label for="telefono" data-i18n="lbl_phone">TELÉFONO:</label>
                 <input type="tel" id="telefono" placeholder="0999999999" required>
             </div>
-            
-            <button type="submit">Guardar en Firebase</button>
+            <button type="submit" data-i18n="btn_save">Guardar en Firebase</button>
         </form>
         
         <hr>
-        <h2>Contactos en la Nube</h2>
+        <h2 data-i18n="list_cloud_contact">Contactos en la Nube</h2>
         <ul id="lista-contactos"></ul>
     </main>
 
@@ -71,7 +71,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- GUARDAR CONTACTO ---
         document.getElementById('form-contactos').addEventListener('submit', async (e) => {
             e.preventDefault();
             try {
@@ -90,25 +89,58 @@
             }
         });
 
-        // --- LEER CONTACTOS ---
         const lista = document.getElementById('lista-contactos');
-        try {
-            const q = query(collection(db, "contactos"), orderBy("createdAt", "desc"));
-            const querySnapshot = await getDocs(q);
-            
-            querySnapshot.forEach((doc) => {
-                const item = doc.data();
-                const li = document.createElement('li');
-                li.style.marginBottom = "10px";
-                li.innerHTML = `
-                    <strong>${item.nombre}</strong> - ${item.profesion}<br>
-                    <small>📧 ${item.email} | 📞 ${item.telefono}</small>
-                `;
-                lista.appendChild(li);
+        const q = query(collection(db, "contactos"), orderBy("createdAt", "desc"));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+            const item = doc.data();
+            lista.innerHTML += `<li><strong>${item.nombre}</strong> - ${item.profesion} (${item.email})</li>`;
+        });
+    </script>
+
+    <script>
+        const I18N = {
+            esp: {
+                nav_home: "Inicio", nav_events: "Eventos", nav_contacts: "Contactos", nav_locations: "Ubicaciones",
+                title_contactos: "Gestión de Contactos",
+                add_contact: "Agregar Nuevo Contacto",
+                lbl_full_name: "NOMBRES Y APELLIDOS:",
+                lbl_id: "CÉDULA DE IDENTIDAD:",
+                lbl_job: "PROFESIÓN:",
+                lbl_email: "CORREO ELECTRÓNICO:",
+                lbl_phone: "TELÉFONO:",
+                btn_save: "Guardar en Firebase",
+                list_cloud_contact: "Contactos en la Nube"
+            },
+            eng: {
+                nav_home: "Home", nav_events: "Events", nav_contacts: "Contacts", nav_locations: "Locations",
+                title_contactos: "Contact Management",
+                add_contact: "Add New Contact",
+                lbl_full_name: "FULL NAME:",
+                lbl_id: "ID NUMBER:",
+                lbl_job: "PROFESSION:",
+                lbl_email: "EMAIL ADDRESS:",
+                lbl_phone: "PHONE:",
+                btn_save: "Save to Firebase",
+                list_cloud_contact: "Contacts in the Cloud"
+            }
+        };
+
+        function setLanguage(lang) {
+            localStorage.setItem('lang', lang);
+            document.documentElement.lang = (lang === 'esp') ? 'es' : 'en';
+            const texts = I18N[lang];
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (texts[key]) el.textContent = texts[key];
             });
-        } catch (error) {
-            console.error("Error al leer contactos: ", error);
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('lang') || 'esp';
+            setLanguage(savedLang);
+        });
     </script>
 </body>
 </html>

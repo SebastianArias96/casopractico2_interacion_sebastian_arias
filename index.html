@@ -24,28 +24,21 @@
         </nav>
 
         <div style="text-align:center; margin-top: 1rem;">
-            <button class="lang-btn" onclick="setLanguage('esp')">
-                🇪🇨 Español
-            </button>
-            <button class="lang-btn" onclick="setLanguage('eng')">
-                🇺🇸 English
-            </button>
+            <button class="lang-btn" onclick="setLanguage('esp')">🇪🇨 Español</button>
+            <button class="lang-btn" onclick="setLanguage('eng')">🇺🇸 English</button>
         </div>
-        
-
-        
     </header>
     
     <main>
         <section style="text-align: center; padding: 2rem 0;">
-            <h2 style="margin-bottom: 1.5rem; font-size: 1.4rem;">¿Deseas ver el informe de hoy?</h2>
+            <h2 data-i18n="report_ask" style="margin-bottom: 1.5rem; font-size: 1.4rem;">¿Deseas ver el informe de hoy?</h2>
             
             <div style="display: flex; justify-content: center;">
                 <a href="Informe.html" style="text-decoration: none; width: 250px;">
                     <div id="card-Informe" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; cursor: pointer;">
                         <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📊</div>
-                        <h3 style="margin-bottom: 0.5rem; font-size: 1.2rem;">Ver Informe</h3>
-                        <p style="opacity: 0.9; font-size: 0.85rem;">Resumen total de registros</p>
+                        <h3 data-i18n="view_report" style="margin-bottom: 0.5rem; font-size: 1.2rem;">Ver Informe</h3>
+                        <p data-i18n="report_desc" style="opacity: 0.9; font-size: 0.85rem;">Resumen total de registros</p>
                     </div>
                 </a>
             </div>
@@ -55,23 +48,62 @@
     <footer>
         <p>&copy; <span data-i18n="footer">2025 Universidad Tecnológica Equinoccial</span></p>
     </footer>
-    
+
     <script>
-        const card = document.getElementById('card-Informe');
-        
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-10px)';
-            this.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.2)';
-        });
-        
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0)';
-            this.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+        // 1. DICCIONARIO INTEGRADO (Para que funcione en todas las páginas)
+        const I18N = {
+            esp: {
+                nav_home: "Inicio", nav_events: "Eventos", nav_contacts: "Contactos", nav_locations: "Ubicaciones",
+                title: "Gestor de Eventos UTE",
+                welcome: "Bienvenido al Sistema de Gestión de Eventos",
+                subtitle: "Seleccione la operación que desee registrar.",
+                report_ask: "¿Deseas ver el informe de hoy?",
+                view_report: "Ver Informe",
+                report_desc: "Resumen total de registros",
+                footer: "2025 Universidad Tecnológica Equinoccial"
+            },
+            eng: {
+                nav_home: "Home", nav_events: "Events", nav_contacts: "Contacts", nav_locations: "Locations",
+                title: "UTE Event Manager",
+                welcome: "Welcome to the Event Management System",
+                subtitle: "Select the operation you wish to register.",
+                report_ask: "Do you want to see today's report?",
+                view_report: "View Report",
+                report_desc: "Total records summary",
+                footer: "2025 Equinoctial Technological University"
+            }
+        };
+
+        // 2. FUNCIÓN DE TRADUCCIÓN
+        function setLanguage(lang) {
+            localStorage.setItem('lang', lang);
+            document.documentElement.lang = (lang === 'esp') ? 'es' : 'en';
+            const texts = I18N[lang];
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (texts[key]) el.textContent = texts[key];
+            });
+        }
+
+        // 3. INICIALIZACIÓN Y EFECTOS
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('lang') || 'esp';
+            setLanguage(savedLang);
+
+            const card = document.getElementById('card-Informe');
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px)';
+                this.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.2)';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+            });
         });
     </script>
 
     <script type="module">
-        // Importación corregida usando CDN
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-analytics.js";
 
@@ -85,39 +117,8 @@
             measurementId: "G-NDYQDSYH14"
         };
 
-        // Inicializar Firebase
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
     </script>
-
-
-    <!-- JavaScript de cambio de idioma -->
-    <script>
-    let translations = {};
-
-    fetch('lang.json')
-        .then(res => res.json())
-        .then(data => {
-            translations = data;
-            const savedLang = localStorage.getItem('lang') || 'esp';
-            setLanguage(savedLang);
-        });
-
-    function setLanguage(lang) {
-        document.documentElement.lang = lang;
-        localStorage.setItem('lang', lang);
-
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            const key = el.getAttribute('data-i18n');
-            if (translations[lang][key]) {
-                el.textContent = translations[lang][key];
-            }
-        });
-}
-</script>
-
-
-
-
 </body>
 </html>

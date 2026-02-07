@@ -3,107 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Informe de Gestión - UTE</title>
+    <title>Informe General - UTE</title>
     <link rel="stylesheet" href="css/styles.css">
     <style>
-        /* Estilos específicos para impresión */
-        @media print {
-            header nav, .no-print, .action-buttons, footer {
-                display: none !important;
-            }
-            body { background: white !important; }
-            main { box-shadow: none !important; max-width: 100% !important; margin: 0; }
-            .data-section { page-break-inside: avoid; margin-bottom: 2rem; }
-            .print-header { display: block !important; text-align: center; border-bottom: 3px solid #2563eb; padding-bottom: 1rem; margin-bottom: 2rem; }
-        }
-        
-        .print-header { display: none; }
-        .action-buttons { display: flex; gap: 1rem; justify-content: center; margin-bottom: 2rem; flex-wrap: wrap; }
-        
-        .btn-print {
-            background: linear-gradient(135deg, #2563eb, #1e40af);
-            padding: 0.8rem 1.5rem;
-            color: white; border: none; border-radius: 0.5rem;
-            font-weight: 600; cursor: pointer; transition: all 0.3s ease;
-        }
-        .btn-print:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
-        .btn-export { background: linear-gradient(135deg, #10b981, #059669); }
-
-        .summary-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem; margin-bottom: 2rem;
-        }
-        
-        .stat-card {
-            background: white; padding: 1.5rem; border-radius: 0.75rem;
-            text-align: center; border-left: 5px solid #2563eb;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-        .stat-card h3 { font-size: 0.9rem; color: #64748b; text-transform: uppercase; margin-bottom: 0.5rem; }
-        .stat-card .number { font-size: 2.5rem; font-weight: 800; color: #1e40af; }
-
-        .data-list { display: grid; gap: 1rem; margin-top: 1rem; }
-        .item-row { 
-            background: #fff; padding: 1rem; border-radius: 0.5rem; 
-            border: 1px solid #e2e8f0; display: flex; justify-content: space-between;
-        }
-        .empty-state { text-align: center; padding: 2rem; color: #94a3b8; font-style: italic; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; background: white; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #7c3aed; color: white; }
+        .section-title { margin-top: 2rem; color: #4c1d95; border-bottom: 2px solid #7c3aed; display: inline-block; }
     </style>
 </head>
 <body>
-    <header class="no-print">
-        <h1>📊 Informe de Gestión</h1>
+    <header>
+        <h1 data-i18n="report_title">Informe General de Registros</h1>
         <nav>
             <ul>
-                <li><a href="index.html">Inicio</a></li>
-                <li><a href="eventos.html">Eventos</a></li>
-                <li><a href="contactos.html">Contactos</a></li>
-                <li><a href="ubicacion.html">Ubicaciones</a></li>
+                <li><a href="index.html" data-i18n="nav_home">Inicio</a></li>
+                <li><a href="eventos.html" data-i18n="nav_events">Eventos</a></li>
+                <li><a href="contactos.html" data-i18n="nav_contacts">Contactos</a></li>
+                <li><a href="ubicacion.html" data-i18n="nav_locations">Ubicaciones</a></li>
             </ul>
         </nav>
+        <div style="text-align:center; margin-top: 1rem;">
+            <button class="lang-btn" onclick="setLanguage('esp')">🇪🇨 Español</button>
+            <button class="lang-btn" onclick="setLanguage('eng')">🇺🇸 English</button>
+        </div>
     </header>
-    
-    <main>
-        <div class="print-header">
-            <h1>📊 Informe General de Gestión</h1>
-            <p><strong>Universidad Tecnológica Equinoccial</strong></p>
-            <p>Fecha: <span id="print-date"></span></p>
-        </div>
-        
-        <div class="action-buttons no-print">
-            <button class="btn-print" onclick="window.print()">🖨️ Imprimir o PDF</button>
-        </div>
-        
-        <div class="summary-stats">
-            <div class="stat-card">
-                <h3>Eventos</h3>
-                <div class="number" id="count-eventos">0</div>
-            </div>
-            <div class="stat-card" style="border-left-color: #10b981;">
-                <h3>Contactos</h3>
-                <div class="number" id="count-contactos">0</div>
-            </div>
-            <div class="stat-card" style="border-left-color: #f59e0b;">
-                <h3>Ubicaciones</h3>
-                <div class="number" id="count-ubicaciones">0</div>
-            </div>
-        </div>
 
-        <section class="data-section">
-            <h2>📅 Últimos Eventos</h2>
-            <div id="list-eventos" class="data-list"><p class="empty-state">Cargando...</p></div>
-        </section>
+    <main style="padding: 2rem;">
+        <h2 class="section-title" data-i18n="nav_events">Eventos</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th data-i18n="lbl_title">TÍTULO</th>
+                    <th data-i18n="lbl_date">FECHA Y HORA</th>
+                    <th data-i18n="lbl_place">LUGAR</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-eventos"></tbody>
+        </table>
 
-        <section class="data-section">
-            <h2>👥 Agenda de Contactos</h2>
-            <div id="list-contactos" class="data-list"><p class="empty-state">Cargando...</p></div>
-        </section>
+        <h2 class="section-title" data-i18n="nav_contacts">Contactos</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th data-i18n="lbl_full_name">NOMBRES</th>
+                    <th data-i18n="lbl_job">PROFESIÓN</th>
+                    <th data-i18n="lbl_email">CORREO</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-contactos"></tbody>
+        </table>
+
+        <h2 class="section-title" data-i18n="nav_locations">Ubicaciones</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th data-i18n="lbl_title">TÍTULO</th>
+                    <th data-i18n="lbl_address">DIRECCIÓN</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-ubicaciones"></tbody>
+        </table>
     </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, limit, orderBy } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDxKQWalmHfLxhbYGru_hzvfuVCUJuHuzw",
@@ -117,47 +82,65 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        async function fetchReport() {
-            try {
-                // 1. CARGAR EVENTOS
-                const qEventos = query(collection(db, "eventos"), orderBy("createdAt", "desc"));
-                const snapEventos = await getDocs(qEventos);
-                document.getElementById('count-eventos').innerText = snapEventos.size;
-                renderList('list-eventos', snapEventos, (d) => `<strong>${d.titulo}</strong> <span>${d.fecha_hora}</span>`);
+        async function cargarDatos() {
+            // Cargar Eventos
+            const qEv = query(collection(db, "eventos"), orderBy("createdAt", "desc"));
+            const snapEv = await getDocs(qEv);
+            snapEv.forEach(doc => {
+                const d = doc.data();
+                document.getElementById('tabla-eventos').innerHTML += `<tr><td>${d.titulo}</td><td>${d.fecha_hora}</td><td>${d.lugar}</td></tr>`;
+            });
 
-                // 2. CARGAR CONTACTOS
-                const snapContactos = await getDocs(collection(db, "contactos"));
-                document.getElementById('count-contactos').innerText = snapContactos.size;
-                renderList('list-contactos', snapContactos, (d) => `<strong>${d.nombre}</strong> <span>${d.email}</span>`);
+            // Cargar Contactos
+            const qCon = query(collection(db, "contactos"), orderBy("createdAt", "desc"));
+            const snapCon = await getDocs(qCon);
+            snapCon.forEach(doc => {
+                const d = doc.data();
+                document.getElementById('tabla-contactos').innerHTML += `<tr><td>${d.nombre}</td><td>${d.profesion}</td><td>${d.email}</td></tr>`;
+            });
 
-                // 3. CARGAR UBICACIONES (Solo conteo)
-                const snapUbicaciones = await getDocs(collection(db, "ubicaciones"));
-                document.getElementById('count-ubicaciones').innerText = snapUbicaciones.size;
-
-            } catch (e) {
-                console.error(e);
-            }
-        }
-
-        function renderList(elementId, snapshot, templateFunc) {
-            const container = document.getElementById(elementId);
-            if (snapshot.empty) {
-                container.innerHTML = '<p class="empty-state">No hay registros.</p>';
-                return;
-            }
-            container.innerHTML = "";
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const div = document.createElement('div');
-                div.className = 'item-row';
-                div.innerHTML = templateFunc(data);
-                container.appendChild(div);
+            // Cargar Ubicaciones
+            const qUb = query(collection(db, "ubicaciones"), orderBy("createdAt", "desc"));
+            const snapUb = await getDocs(qUb);
+            snapUb.forEach(doc => {
+                const d = doc.data();
+                document.getElementById('tabla-ubicaciones').innerHTML += `<tr><td>${d.nombre}</td><td>${d.direccion}</td></tr>`;
             });
         }
 
-        // Fecha actual
-        document.getElementById('print-date').innerText = new Date().toLocaleDateString();
-        fetchReport();
+        cargarDatos();
+    </script>
+
+    <script>
+        const I18N = {
+            esp: {
+                nav_home: "Inicio", nav_events: "Eventos", nav_contacts: "Contactos", nav_locations: "Ubicaciones",
+                report_title: "Informe General de Registros",
+                lbl_title: "TÍTULO", lbl_date: "FECHA Y HORA", lbl_place: "LUGAR",
+                lbl_full_name: "NOMBRES", lbl_job: "PROFESIÓN", lbl_email: "CORREO", lbl_address: "DIRECCIÓN"
+            },
+            eng: {
+                nav_home: "Home", nav_events: "Events", nav_contacts: "Contacts", nav_locations: "Locations",
+                report_title: "General Records Report",
+                lbl_title: "TITLE", lbl_date: "DATE & TIME", lbl_place: "LOCATION",
+                lbl_full_name: "NAMES", lbl_job: "PROFESSION", lbl_email: "EMAIL", lbl_address: "ADDRESS"
+            }
+        };
+
+        function setLanguage(lang) {
+            localStorage.setItem('lang', lang);
+            document.documentElement.lang = (lang === 'esp') ? 'es' : 'en';
+            const texts = I18N[lang];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (texts[key]) el.textContent = texts[key];
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('lang') || 'esp';
+            setLanguage(savedLang);
+        });
     </script>
 </body>
 </html>

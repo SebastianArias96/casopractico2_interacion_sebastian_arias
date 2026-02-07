@@ -8,37 +8,42 @@
 </head>
 <body>
     <header>
-        <h1>Gestión de Eventos</h1>
+        <h1 data-i18n="title_eventos">Gestión de Eventos</h1>
         <nav>
             <ul>
-                <li><a href="index.html">Inicio</a></li>
-                <li><a href="eventos.html">Eventos</a></li>
-                <li><a href="contactos.html">Contactos</a></li>
-                <li><a href="ubicacion.html">Ubicaciones</a></li>
+                <li><a href="index.html" data-i18n="nav_home">Inicio</a></li>
+                <li><a href="eventos.html" data-i18n="nav_events">Eventos</a></li>
+                <li><a href="contactos.html" data-i18n="nav_contacts">Contactos</a></li>
+                <li><a href="ubicacion.html" data-i18n="nav_locations">Ubicaciones</a></li>
             </ul>
         </nav>
+
+        <div style="text-align:center; margin-top: 1rem;">
+            <button class="lang-btn" onclick="setLanguage('esp')">🇪🇨 Español</button>
+            <button class="lang-btn" onclick="setLanguage('eng')">🇺🇸 English</button>
+        </div>
     </header>
 
     <main>
-        <h2>Agregar Nuevo Evento</h2>
+        <h2 data-i18n="add_event">Agregar Nuevo Evento</h2>
         <form id="form-eventos">
             <div>
-                <label for="titulo">Nombre del evento:</label>
+                <label for="titulo" data-i18n="lbl_name_event">NOMBRE DEL EVENTO:</label>
                 <input type="text" id="titulo" required>
             </div>
             <div>
-                <label for="fecha_hora">Fecha y Hora:</label>
+                <label for="fecha_hora" data-i18n="lbl_date">FECHA Y HORA:</label>
                 <input type="datetime-local" id="fecha_hora" required>
             </div>
             <div>
-                <label for="lugar">Lugar:</label>
+                <label for="lugar" data-i18n="lbl_place">LUGAR:</label>
                 <input type="text" id="lugar" required>
             </div>
-            <button type="submit">Guardar en Firebase</button>
+            <button type="submit" data-i18n="btn_save">Guardar en Firebase</button>
         </form>
         
         <hr>
-        <h2>Eventos en la Nube</h2>
+        <h2 data-i18n="list_cloud_event">Eventos en la Nube</h2>
         <ul id="lista-eventos"></ul>
     </main>
 
@@ -58,7 +63,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Guardar
         document.getElementById('form-eventos').addEventListener('submit', async (e) => {
             e.preventDefault();
             try {
@@ -75,13 +79,53 @@
             }
         });
 
-        // Leer
         const lista = document.getElementById('lista-eventos');
         const q = query(collection(db, "eventos"), orderBy("createdAt", "desc"));
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
             const item = doc.data();
             lista.innerHTML += `<li><strong>${item.titulo}</strong> - ${item.lugar}</li>`;
+        });
+    </script>
+
+    <script>
+        const I18N = {
+            esp: {
+                nav_home: "Inicio", nav_events: "Eventos", nav_contacts: "Contactos", nav_locations: "Ubicaciones",
+                title_eventos: "Gestión de Eventos",
+                add_event: "Agregar Nuevo Evento",
+                lbl_name_event: "NOMBRE DEL EVENTO:",
+                lbl_date: "FECHA Y HORA:",
+                lbl_place: "LUGAR:",
+                btn_save: "Guardar en Firebase",
+                list_cloud_event: "Eventos en la Nube"
+            },
+            eng: {
+                nav_home: "Home", nav_events: "Events", nav_contacts: "Contacts", nav_locations: "Locations",
+                title_eventos: "Event Management",
+                add_event: "Add New Event",
+                lbl_name_event: "EVENT NAME:",
+                lbl_date: "DATE AND TIME:",
+                lbl_place: "LOCATION:",
+                btn_save: "Save to Firebase",
+                list_cloud_event: "Events in the Cloud"
+            }
+        };
+
+        function setLanguage(lang) {
+            localStorage.setItem('lang', lang);
+            document.documentElement.lang = (lang === 'esp') ? 'es' : 'en';
+            const texts = I18N[lang];
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (texts[key]) el.textContent = texts[key];
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('lang') || 'esp';
+            setLanguage(savedLang);
         });
     </script>
 </body>

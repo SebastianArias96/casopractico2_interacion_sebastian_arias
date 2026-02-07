@@ -8,124 +8,125 @@
 </head>
 <body>
     <header>
-        <h1>Gestión de Ubicaciones</h1>
+        <h1 data-i18n="title_ubicaciones">Gestión de Ubicaciones</h1>
         <nav>
             <ul>
-                <li><a href="index.html">Inicio</a></li>
-                <li><a href="eventos.html">Eventos</a></li>
-                <li><a href="contactos.html">Contactos</a></li>
-                <li><a href="ubicacion.html">Ubicaciones</a></li>
+                <li><a href="index.html" data-i18n="nav_home">Inicio</a></li>
+                <li><a href="eventos.html" data-i18n="nav_events">Eventos</a></li>
+                <li><a href="contactos.html" data-i18n="nav_contacts">Contactos</a></li>
+                <li><a href="ubicacion.html" data-i18n="nav_locations">Ubicaciones</a></li>
             </ul>
         </nav>
+
+        <div style="text-align:center; margin-top: 1rem;">
+            <button class="lang-btn" onclick="setLanguage('esp')">🇪🇨 Español</button>
+            <button class="lang-btn" onclick="setLanguage('eng')">🇺🇸 English</button>
+        </div>
     </header>
 
     <main>
-        <h2>Agregar Nueva Ubicación</h2>
+        <h2 data-i18n="add_location">Agregar Nueva Ubicación</h2>
         <form id="form-ubicaciones">
             <div>
-                <label for="titulo">Título:</label>
-                <input type="text" id="titulo" placeholder="Ej: Campus Principal" required>
+                <label for="nombre_ubi" data-i18n="lbl_title">TÍTULO:</label>
+                <input type="text" id="nombre_ubi" placeholder="Ej: Campus Principal" required>
             </div>
-            
             <div>
-                <label for="direccion">Dirección:</label>
-                <input type="text" id="direccion" placeholder="Ej: Av. Principal 123" required>
+                <label for="direccion" data-i18n="lbl_address">DIRECCIÓN:</label>
+                <input type="text" id="direccion" required>
             </div>
-            
             <div>
-                <label for="coordenadas">Coordenadas Geográficas (Lat, Lon):</label>
+                <label for="coordenadas" data-i18n="lbl_coords">COORDENADAS GEOGRÁFICAS (LAT, LON):</label>
                 <input type="text" id="coordenadas" placeholder="Ej: -0.1807, -78.4678" required>
             </div>
-            
-            <button type="submit">Guardar Ubicación en Firebase</button>
+            <button type="submit" data-i18n="btn_save_loc">Guardar Ubicación en Firebase</button>
         </form>
         
         <hr>
-        <h2>Ubicaciones Registradas (Nube)</h2>
-        <ul id="lista-ubicaciones">
-            </ul>
+        <h2 data-i18n="list_cloud_location">Ubicaciones Registradas (Nube)</h2>
+        <ul id="lista-ubicaciones"></ul>
     </main>
 
-    <footer>
-        <p>&copy; 2025 Universidad Tecnológica Equinoccial</p>
-    </footer>
-
     <script type="module">
-        // Importaciones desde la CDN estable
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
-        // Tu configuración de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDxKQWalmHfLxhbYGru_hzvfuVCUJuHuzw",
             authDomain: "caso-practico-c631b.firebaseapp.com",
             projectId: "caso-practico-c631b",
             storageBucket: "caso-practico-c631b.firebasestorage.app",
             messagingSenderId: "233285378258",
-            appId: "1:233285378258:web:8abcd2c3ae504e17da8d0b",
-            measurementId: "G-NDYQDSYH14"
+            appId: "1:233285378258:web:8abcd2c3ae504e17da8d0b"
         };
 
-        // Inicializar Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const form = document.getElementById('form-ubicaciones');
-        const listaUl = document.getElementById('lista-ubicaciones');
-
-        // --- GUARDAR UBICACIÓN ---
-        form.addEventListener('submit', async (e) => {
+        document.getElementById('form-ubicaciones').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            const nuevaUbicacion = {
-                titulo: document.getElementById('titulo').value,
-                direccion: document.getElementById('direccion').value,
-                coordenadas: document.getElementById('coordenadas').value,
-                createdAt: serverTimestamp()
-            };
-
             try {
-                await addDoc(collection(db, "ubicaciones"), nuevaUbicacion);
-                alert("📍 Ubicación guardada con éxito!");
-                form.reset();
-                cargarUbicaciones();
+                await addDoc(collection(db, "ubicaciones"), {
+                    nombre: document.getElementById('nombre_ubi').value,
+                    direccion: document.getElementById('direccion').value,
+                    coordenadas: document.getElementById('coordenadas').value,
+                    createdAt: serverTimestamp()
+                });
+                alert("¡Ubicación Guardada!");
+                location.reload();
             } catch (error) {
-                console.error("Error al guardar:", error);
-                alert("Error al conectar con la base de datos.");
+                alert("Error: " + error.message);
             }
         });
 
-        // --- LEER UBICACIONES ---
-        async function cargarUbicaciones() {
-            listaUl.innerHTML = "<li>Cargando ubicaciones...</li>";
-            try {
-                const q = query(collection(db, "ubicaciones"), orderBy("createdAt", "desc"));
-                const querySnapshot = await getDocs(q);
-                
-                listaUl.innerHTML = "";
-                
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const li = document.createElement('li');
-                    li.style.padding = "10px";
-                    li.style.borderBottom = "1px solid #ddd";
-                    
-                    // Usamos backticks para insertar las variables de Firebase
-                    li.innerHTML = `
-                        <strong>${data.titulo}</strong><br>
-                        🏠 Dirección: ${data.direccion}<br>
-                        🗺️ Coordenadas: ${data.coordenadas}
-                    `;
-                    listaUl.appendChild(li);
-                });
-            } catch (error) {
-                console.error("Error al cargar:", error);
-                listaUl.innerHTML = "<li>Error al cargar datos de la nube.</li>";
+        const lista = document.getElementById('lista-ubicaciones');
+        const q = query(collection(db, "ubicaciones"), orderBy("createdAt", "desc"));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+            const item = doc.data();
+            lista.innerHTML += `<li><strong>${item.nombre}</strong> - ${item.direccion} (${item.coordenadas})</li>`;
+        });
+    </script>
+
+    <script>
+        const I18N = {
+            esp: {
+                nav_home: "Inicio", nav_events: "Eventos", nav_contacts: "Contactos", nav_locations: "Ubicaciones",
+                title_ubicaciones: "Gestión de Ubicaciones",
+                add_location: "Agregar Nueva Ubicación",
+                lbl_title: "TÍTULO:",
+                lbl_address: "DIRECCIÓN:",
+                lbl_coords: "COORDENADAS GEOGRÁFICAS (LAT, LON):",
+                btn_save_loc: "Guardar Ubicación en Firebase",
+                list_cloud_location: "Ubicaciones Registradas (Nube)"
+            },
+            eng: {
+                nav_home: "Home", nav_events: "Events", nav_contacts: "Contacts", nav_locations: "Locations",
+                title_ubicaciones: "Location Management",
+                add_location: "Add New Location",
+                lbl_title: "TITLE:",
+                lbl_address: "ADDRESS:",
+                lbl_coords: "GEOGRAPHIC COORDINATES (LAT, LON):",
+                btn_save_loc: "Save Location to Firebase",
+                list_cloud_location: "Registered Locations (Cloud)"
             }
+        };
+
+        function setLanguage(lang) {
+            localStorage.setItem('lang', lang);
+            document.documentElement.lang = (lang === 'esp') ? 'es' : 'en';
+            const texts = I18N[lang];
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (texts[key]) el.textContent = texts[key];
+            });
         }
 
-        // Carga inicial
-        cargarUbicaciones();
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('lang') || 'esp';
+            setLanguage(savedLang);
+        });
     </script>
 </body>
 </html>
