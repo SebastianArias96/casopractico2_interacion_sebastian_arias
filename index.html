@@ -5,6 +5,63 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Gestión de Eventos - Universidad Tecnológica Equinoccial</title>
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Estilos para el Modal de Video */
+        #modalAyuda {
+            display: none; 
+            position: fixed; 
+            z-index: 2000; 
+            left: 0; top: 0; 
+            width: 100%; height: 100%; 
+            background-color: rgba(0,0,0,0.85);
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background-color: white; 
+            margin: 5% auto; 
+            padding: 20px; 
+            width: 90%; 
+            max-width: 700px; 
+            border-radius: 15px; 
+            text-align: center; 
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+        .close-btn {
+            position: absolute; 
+            right: 20px; 
+            top: 10px; 
+            cursor: pointer; 
+            font-size: 35px; 
+            color: #333;
+        }
+        .video-container {
+            position: relative; 
+            padding-bottom: 56.25%; 
+            height: 0; 
+            overflow: hidden; 
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        .video-container iframe {
+            position: absolute; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%;
+        }
+        .help-btn-style {
+            background-color: #f59e0b; 
+            color: white; 
+            padding: 10px 25px; 
+            border: none; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            font-weight: bold;
+            font-size: 1rem;
+            transition: background 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .help-btn-style:hover { background-color: #d97706; }
+    </style>
 </head>
 <body>
     <header>
@@ -27,8 +84,27 @@
             <button class="lang-btn" onclick="setLanguage('esp')">🇪🇨 Español</button>
             <button class="lang-btn" onclick="setLanguage('eng')">🇺🇸 English</button>
         </div>
+
+        <div style="text-align:center; margin-top: 15px;">
+            <button class="help-btn-style" onclick="abrirAyuda()">
+                ❓ <span data-i18n="btn_help">Ayuda</span>
+            </button>
+        </div>
     </header>
     
+    <div id="modalAyuda">
+        <div class="modal-content">
+            <span class="close-btn" onclick="cerrarAyuda()">&times;</span>
+            <h2 data-i18n="help_title" style="color: #7c3aed;">Tutorial de Uso</h2>
+            <div class="video-container">
+                <iframe id="videoTutorial" 
+                    src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+                    frameborder="0" allowfullscreen>
+                </iframe>
+            </div>
+        </div>
+    </div>
+
     <main>
         <section style="text-align: center; padding: 2rem 0;">
             <h2 data-i18n="report_ask" style="margin-bottom: 1.5rem; font-size: 1.4rem;">¿Deseas ver el informe de hoy?</h2>
@@ -50,7 +126,7 @@
     </footer>
 
     <script>
-        // 1. DICCIONARIO INTEGRADO (Para que funcione en todas las páginas)
+        // 1. DICCIONARIO ACTUALIZADO CON AYUDA
         const I18N = {
             esp: {
                 nav_home: "Inicio", nav_events: "Eventos", nav_contacts: "Contactos", nav_locations: "Ubicaciones",
@@ -60,7 +136,9 @@
                 report_ask: "¿Deseas ver el informe de hoy?",
                 view_report: "Ver Informe",
                 report_desc: "Resumen total de registros",
-                footer: "2025 Universidad Tecnológica Equinoccial"
+                footer: "2025 Universidad Tecnológica Equinoccial",
+                btn_help: "Ayuda",
+                help_title: "Tutorial de Uso"
             },
             eng: {
                 nav_home: "Home", nav_events: "Events", nav_contacts: "Contacts", nav_locations: "Locations",
@@ -70,7 +148,9 @@
                 report_ask: "Do you want to see today's report?",
                 view_report: "View Report",
                 report_desc: "Total records summary",
-                footer: "2025 Equinoctial Technological University"
+                footer: "2025 Equinoctial Technological University",
+                btn_help: "Help",
+                help_title: "User Tutorial"
             }
         };
 
@@ -86,7 +166,28 @@
             });
         }
 
-        // 3. INICIALIZACIÓN Y EFECTOS
+        // 3. FUNCIONES DEL MODAL DE VIDEO
+        function abrirAyuda() {
+            document.getElementById('modalAyuda').style.display = "block";
+        }
+
+        function cerrarAyuda() {
+            const modal = document.getElementById('modalAyuda');
+            const iframe = document.getElementById('videoTutorial');
+            // Detener el video al cerrar
+            const url = iframe.src;
+            iframe.src = '';
+            iframe.src = url;
+            modal.style.display = "none";
+        }
+
+        // Cerrar si hacen clic fuera del modal
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalAyuda');
+            if (event.target == modal) { cerrarAyuda(); }
+        }
+
+        // 4. INICIALIZACIÓN
         document.addEventListener('DOMContentLoaded', () => {
             const savedLang = localStorage.getItem('lang') || 'esp';
             setLanguage(savedLang);
@@ -121,4 +222,5 @@
         const analytics = getAnalytics(app);
     </script>
 </body>
+
 </html>
